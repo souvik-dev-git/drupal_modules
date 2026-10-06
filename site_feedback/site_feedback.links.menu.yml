@@ -1,6 +1,0 @@
-site_feedback.settings:
-  title: 'Site Feedback Settings'
-  description: 'Configure Site Feedback settings.'
-  route_name: site_feedback.settings
-  parent: system.admin_config_development
-  weight: 100
