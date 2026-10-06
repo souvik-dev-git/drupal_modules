@@ -132,7 +132,6 @@ public function overview() {
       $this->t('Title'),
       $this->t('Content Type'),
       $this->t('Restricted Roles'),
-      $this->t('Restricted Users'),
       $this->t('Restriction Type'),
       $this->t('Administrator Bypass'),
       $this->t('Updated'),
@@ -142,14 +141,8 @@ public function overview() {
     $node_storage = $this->entityTypeManagerService->getStorage('node');
 
     $query = $node_storage->getQuery()
-      ->accessCheck(FALSE);
-
-    $or = $query->orConditionGroup()
+      ->accessCheck(FALSE)
       ->exists('field_restrict_roles')
-      ->exists('field_restrict_users');
-
-    $query
-      ->condition($or)
       ->sort('changed', 'DESC')
       ->pager(25);
 
@@ -182,12 +175,6 @@ public function overview() {
         $restricted_roles = [];
         foreach ($node->get('field_restrict_roles') as $item) {
           $restricted_roles[] = $role_labels[$item->value] ?? $item->value;
-        }
-
-        // Restricted users.
-        $restricted_users = [];
-        foreach ($node->get('field_restrict_users')->referencedEntities() as $user) {
-          $restricted_users[] = $user->getDisplayName();
         }
 
         $restriction_type = $node->get('field_restrict_action')->value === '404'
@@ -229,9 +216,6 @@ public function overview() {
           $content_type,
           !empty($restricted_roles)
             ? implode(', ', $restricted_roles)
-            : $this->t('None'),
-          !empty($restricted_users)
-            ? implode(', ', $restricted_users)
             : $this->t('None'),
           $restriction_type,
           $admin_bypass,

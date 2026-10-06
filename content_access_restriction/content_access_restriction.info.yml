@@ -1,9 +1,8 @@
 name: Content Access Restriction
 type: module
 description: Provides configurable role-based access restrictions for content, including per-node access control, configurable response behavior (403/404), and administrative reporting.
-package: Custom
 version: '1.0.0'
 core_version_requirement: ^10 || ^11
-configure: content_access_restriction.admin
+configure: volvo_content_access_restriction.admin
 dependencies:
   - drupal:node
