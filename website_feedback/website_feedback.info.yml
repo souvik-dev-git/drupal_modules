@@ -1,0 +1,5 @@
+name: 'Website Feedback'
+type: module
+description: 'Provides Website feedback functionality.'
+core_version_requirement: ^10 || ^11
+configure: website_feedback.settings

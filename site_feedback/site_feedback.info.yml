@@ -1,0 +1,8 @@
+name: 'Site Feedback'
+type: module
+description: 'Provides Website feedback functionality.'
+package: User interface
+core_version_requirement: ^10 || ^11
+configure: site_feedback.settings
+dependencies:
+  - drupal:file

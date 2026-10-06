@@ -1,0 +1,75 @@
+site_feedback.form:
+  path: '/site-feedback/form'
+  defaults:
+    _controller: '\Drupal\site_feedback\Controller\SiteFeedbackController::form'
+  requirements:
+    _permission: 'access content'
+
+site_feedback.submit:
+  path: '/site-feedback/submit'
+  defaults:
+    _controller: '\Drupal\site_feedback\Controller\SiteFeedbackController::submit'
+  methods: [POST]
+  requirements:
+    _permission: 'access content'
+    _csrf_request_header_token: 'TRUE'
+
+site_feedback.upload:
+  path: '/site-feedback/upload-image'
+  defaults:
+    _controller: '\Drupal\site_feedback\Controller\SiteFeedbackController::upload'
+  methods: [POST]
+  requirements:
+    _csrf_request_header_token: 'TRUE'
+
+site_feedback.delete_image:
+  path: '/site-feedback/delete-image/{fid}'
+  defaults:
+    _controller: '\Drupal\site_feedback\Controller\SiteFeedbackController::delete'
+  methods: [DELETE]
+  requirements:
+    _csrf_request_header_token: 'TRUE'
+    fid: '\d+'
+
+site_feedback.collection:
+  path: '/admin/content/site-feedback'
+  defaults:
+    _entity_list: 'site_feedback'
+    _title: 'Site Feedback'
+  requirements:
+    _permission: 'view site feedback list'
+
+entity.site_feedback.canonical:
+  path: '/admin/content/site-feedback/{site_feedback}'
+  defaults:
+    _controller: '\Drupal\site_feedback\Controller\SiteFeedbackController::view'
+    _title_callback: '\Drupal\site_feedback\Controller\SiteFeedbackController::feedbackTitle'
+  requirements:
+    _permission: 'view site feedback'
+site_feedback.delete:
+  path: '/admin/content/site-feedback/{site_feedback}/delete'
+  defaults:
+    _form: '\Drupal\site_feedback\Form\SiteFeedbackDeleteForm'
+    _title: 'Delete feedback'
+  requirements:
+    _permission: 'delete site feedback'
+
+site_feedback.settings:
+  path: '/admin/config/development/site-feedback'
+  defaults:
+    _form: '\Drupal\site_feedback\Form\SiteFeedbackSettingsForm'
+    _title: 'Site Feedback Settings'
+  requirements:
+    _permission: 'administer site feedback'
+
+entity.site_feedback.change_status:
+  path: '/admin/content/site-feedback/{site_feedback}/change-status'
+  defaults:
+    _form: '\Drupal\site_feedback\Form\SiteFeedbackStatusForm'
+    _title: 'Change Feedback Status'
+  requirements:
+    _permission: 'update site feedback'
+  options:
+    parameters:
+      site_feedback:
+        type: entity:site_feedback

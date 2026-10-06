@@ -1,0 +1,3 @@
+services:
+  website_feedback.servicenow_ticket:
+    class: Drupal\website_feedback\Service\ServiceNowTicketService

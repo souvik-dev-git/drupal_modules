@@ -1,0 +1,9 @@
+name: Update Inline Media References
+type: module
+description: Updates migrated inline media references within formatted content fields.
+core_version_requirement: ^10 || ^11
+package: Media
+project: 'volvo'
+version: '1.0.0'
+author: 'Souvik Das'
+configure: update_inline_media_references.form

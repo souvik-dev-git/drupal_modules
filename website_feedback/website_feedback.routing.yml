@@ -1,0 +1,73 @@
+website_feedback.form:
+  path: '/website-feedback/form'
+  defaults:
+    _controller: '\Drupal\website_feedback\Controller\WebsiteFeedbackController::form'
+  requirements:
+    _permission: 'access content'
+
+website_feedback.submit:
+  path: '/website-feedback/submit'
+  defaults:
+    _controller: '\Drupal\website_feedback\Controller\WebsiteFeedbackController::submit'
+  requirements:
+    _permission: 'access content'
+
+website_feedback.upload:
+  path: '/website-feedback/upload-image'
+  defaults:
+    _controller: '\Drupal\website_feedback\Controller\WebsiteFeedbackController::upload'
+  methods: [POST]
+  requirements:
+    _access: 'TRUE'
+
+website_feedback.delete_image:
+  path: '/website-feedback/delete-image/{fid}'
+  defaults:
+    _controller: '\Drupal\website_feedback\Controller\WebsiteFeedbackController::delete'
+  methods: [DELETE]
+  requirements:
+    _access: 'TRUE'
+    fid: '\d+'
+
+website_feedback.collection:
+  path: '/admin/content/website-feedback'
+  defaults:
+    _entity_list: 'website_feedback'
+    _title: 'Website Feedback'
+  requirements:
+    _permission: 'view website feedback list'
+
+entity.website_feedback.canonical:
+  path: '/admin/content/website-feedback/{website_feedback}'
+  defaults:
+    _controller: '\Drupal\website_feedback\Controller\WebsiteFeedbackController::view'
+    _title_callback: '\Drupal\website_feedback\Controller\WebsiteFeedbackController::feedbackTitle'
+  requirements:
+    _permission: 'view website feedback'
+website_feedback.delete:
+  path: '/admin/content/website-feedback/{website_feedback}/delete'
+  defaults:
+    _form: '\Drupal\website_feedback\Form\WebsiteFeedbackDeleteForm'
+    _title: 'Delete feedback'
+  requirements:
+    _permission: 'delete website feedback'
+
+website_feedback.settings:
+  path: '/admin/config/development/website-feedback'
+  defaults:
+    _form: '\Drupal\website_feedback\Form\WebsiteFeedbackSettingsForm'
+    _title: 'Website Feedback Settings'
+  requirements:
+    _permission: 'administer website feedback'
+
+entity.website_feedback.change_status:
+  path: '/admin/content/website-feedback/{website_feedback}/change-status'
+  defaults:
+    _form: '\Drupal\website_feedback\Form\WebsiteFeedbackStatusForm'
+    _title: 'Change Feedback Status'
+  requirements:
+    _permission: 'view website feedback'
+  options:
+    parameters:
+      website_feedback:
+        type: entity:website_feedback

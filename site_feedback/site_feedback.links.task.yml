@@ -1,0 +1,5 @@
+site_feedback.admin_content:
+  route_name: site_feedback.collection
+  title: 'Site Feedback'
+  base_route: system.admin_content
+  weight: 20

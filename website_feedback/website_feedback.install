@@ -1,0 +1,11 @@
+<?php
+
+/**
+ * Implements hook_install().
+ */
+function website_feedback_install() {
+  $entity_type_manager = \Drupal::entityTypeManager();
+  $definition = $entity_type_manager->getDefinition('website_feedback');
+
+  \Drupal::entityDefinitionUpdateManager()->installEntityType($definition);
+}

@@ -1,0 +1,20 @@
+<?php
+
+/**
+* @file
+* Provides hooks for the Website Feedback module.
+*/
+function website_feedback_page_attachments(array &$attachments) {
+  // Do not load the feedback UI on Drupal administration pages.
+  if (\Drupal::service('router.admin_context')->isAdminRoute()) {
+    return;
+  }
+
+  $config = \Drupal::config('website_feedback.settings');
+
+  if (!$config->get('feedback_button_enabled')) {
+    return;
+  }
+
+  $attachments['#attached']['library'][] = 'website_feedback/feedback';
+}

@@ -1,0 +1,18 @@
+feedback:
+  css:
+    theme:
+      https://use.fontawesome.com/releases/v6.7.2/css/all.css: {}
+      css/feedback.css: {}
+  js:
+    https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js: {}
+    js/feedback.js: {}
+    js/image-upload.js: {}
+    js/screenshot.js: {}
+  dependencies:
+    - core/drupal
+    - core/drupal.ajax
+    - core/once
+feedback_admin:
+  css:
+    theme:
+      css/feedback-admin.css: {}

@@ -1,0 +1,5 @@
+services:
+  content_access_restriction.content_access_subscriber:
+    class: Drupal\content_access_restriction\EventSubscriber\ContentAccessSubscriber
+    tags:
+      - { name: event_subscriber }

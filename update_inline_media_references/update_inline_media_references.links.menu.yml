@@ -1,0 +1,13 @@
+update_inline_media_references.form:
+  title: 'Update Media References'
+  description: 'Update migrated media references within formatted content fields.'
+  parent: system.admin_config_media
+  route_name: update_inline_media_references.form
+  weight: -22
+
+update_inline_media_references.help:
+  title: 'Inline Media References Help'
+  description: 'Help and usage instructions for Update Inline Media References module.'
+  route_name: update_inline_media_references.help
+  parent: system.admin_help
+  weight: 100

@@ -1,0 +1,229 @@
+<?php
+
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\node\NodeInterface;
+use Drupal\node\NodeForm;
+
+/**
+ * Implements hook_form_alter().
+ */
+function content_access_restriction_form_node_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+
+    $form_object = $form_state->getFormObject();
+
+    if (!($form_object instanceof NodeForm)) {
+        return;
+    }
+
+    $node = $form_object->getEntity();
+
+    if (!$node instanceof NodeInterface) {
+        return;
+    }
+
+    $config = \Drupal::config('content_access_restriction.settings');
+    $enabled_types = array_filter($config->get('enabled_content_types') ?? []);
+
+    if (!in_array($node->bundle(), $enabled_types, TRUE)) {
+    return;
+    }
+
+    $roles = [];
+    $user_roles = \Drupal::entityTypeManager()
+    ->getStorage('user_role')
+    ->loadMultiple();
+
+    foreach ($user_roles as $role) {
+        if ($role->id() === 'administrator') {
+            continue;
+        }
+        $roles[$role->id()] = $role->label();
+    }
+
+
+    $existing_roles = [];
+    if (!$node->get('field_restrict_roles')->isEmpty()) {
+        $existing_roles = array_column(
+            $node->get('field_restrict_roles')->getValue(),
+            'value'
+        );
+    }
+
+    $existing_action = $node->get('field_restrict_action')->value ?? '403';
+
+    $bypass_admin = (bool) ($node->get('field_restrict_bypass_admin')->value ?? 0);
+
+    $form['access_tabs'] = [
+        '#type' => 'vertical_tabs',
+        '#title' => t('Content Access Restriction'),
+        '#weight' => 90,
+    ];
+
+    $form['restrict_settings'] = [
+        '#type' => 'details',
+        '#title' => t('Content Access Restriction'),
+        '#open' => TRUE,
+        '#group' => 'access_tabs',
+        '#weight' => 90,
+    ];
+
+    $form['restrict_settings']['field_restrict_roles_custom'] = [
+        '#type' => 'checkboxes',
+        '#title' => t('Restrict this page from'),
+        '#options' => $roles,
+        '#default_value' => $existing_roles,
+    ];
+
+    $existing_users = [];
+
+    if (!$node->get('field_restrict_users')->isEmpty()) {
+    foreach ($node->get('field_restrict_users')->referencedEntities() as $user) {
+        $existing_users[] = $user;
+    }
+    }
+
+    $form['restrict_settings']['field_restrict_users_custom'] = [
+    '#type' => 'entity_autocomplete',
+    '#title' => t('Restrict this page from specific users'),
+    '#target_type' => 'user',
+    '#tags' => TRUE,
+    '#selection_settings' => [
+        'include_anonymous' => FALSE,
+    ],
+    '#default_value' => $existing_users,
+    '#description' => t('Search and select one or more usernames. To add another username, type a comma (,) after each selected username and then start typing the next username.'),
+    ];
+
+    $form['restrict_settings']['field_restrict_action_custom'] = [
+        '#type' => 'radios',
+        '#title' => t('How do you want to restrict?'),
+        '#options' => [
+        '403' => t('Access Denied (403)'),
+        '404' => t('Page Not Found (404)'),
+        ],
+        '#default_value' => $existing_action,
+    ];
+
+
+    $form['restrict_settings']['field_restrict_bypass_admin_custom'] = [
+        '#type' => 'checkbox',
+        '#title' => t('Bypass this access check for Administrator'),
+        '#default_value' => $bypass_admin,
+        '#description' => t('If enabled, users with Administrator role can always access this page.'),
+    ];
+
+
+    $form['field_restrict_roles']['#access'] = FALSE;
+    $form['field_restrict_users']['#access'] = FALSE;
+    $form['field_restrict_action']['#access'] = FALSE;
+    $form['field_restrict_bypass_admin']['#access'] = FALSE;
+
+    $form['#entity_builders']['content_access_restriction'] = 'content_access_restriction_entity_builder';
+}
+
+// function content_access_restriction_entity_builder($entity_type, NodeInterface $entity, array &$form, FormStateInterface $form_state) {
+
+//     // Only process nodes.
+//     if ($entity->getEntityTypeId() !== 'node') {
+//         return;
+//     }
+
+//     $selected_roles = array_filter(
+//         (array) $form_state->getValue('field_restrict_roles_custom')
+//     );
+
+//     // Administrator is handled separately.
+//     $selected_roles = array_diff($selected_roles, ['administrator']);
+
+//     $role_values = [];
+
+//     foreach ($selected_roles as $role) {
+//         $role_values[] = [
+//         'value' => $role,
+//         ];
+//     }
+
+//     $entity->set('field_restrict_roles', $role_values);
+
+
+//     $action = $form_state->getValue('field_restrict_action_custom');
+
+//     if (!in_array($action, ['403', '404'], TRUE)) {
+//         $action = '403';
+//     }
+
+//     $entity->set('field_restrict_action', $action);
+
+
+
+//     $entity->set(
+//         'field_restrict_bypass_admin',
+//         $form_state->getValue('field_restrict_bypass_admin_custom') ? 1 : 0
+//     );
+// }
+/**
+ * Entity builder for Content Access Restriction fields.
+ */
+function content_access_restriction_entity_builder($entity_type, NodeInterface $entity, array &$form, FormStateInterface $form_state) {
+
+  // Only process nodes.
+  if ($entity->getEntityTypeId() !== 'node') {
+    return;
+  }
+
+  /**
+   * Restrict Roles
+   */
+  $selected_roles = array_filter(
+    (array) $form_state->getValue('field_restrict_roles_custom')
+  );
+
+  // Administrator is handled separately.
+  $selected_roles = array_diff($selected_roles, ['administrator']);
+
+  $role_values = [];
+
+  foreach ($selected_roles as $role) {
+    $role_values[] = [
+      'value' => $role,
+    ];
+  }
+
+  $entity->set('field_restrict_roles', $role_values);
+
+  /**
+   * Restrict Users
+   */
+  $selected_users = (array) $form_state->getValue('field_restrict_users_custom');
+
+  $user_values = [];
+
+  foreach ($selected_users as $user) {
+    if (!empty($user['target_id'])) {
+      $user_values[] = [
+        'target_id' => $user['target_id'],
+      ];
+    }
+  }
+
+  $entity->set('field_restrict_users', $user_values);
+
+  /**
+   * Restrict Action
+   */
+  $action = $form_state->getValue('field_restrict_action_custom');
+
+  if (!in_array($action, ['403', '404'], TRUE)) {
+    $action = '403';
+  }
+
+  $entity->set('field_restrict_action', $action);
+
+  /**
+   * Administrator Bypass
+   */
+  $entity->set(
+    'field_restrict_bypass_admin',
+    $form_state->getValue('field_restrict_bypass_admin_custom') ? 1 : 0
+  );
+}

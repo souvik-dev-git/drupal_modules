@@ -1,0 +1,13 @@
+services:
+
+  update_inline_media_references.fixer:
+    class: Drupal\update_inline_media_references\Service\MediaUrlFixer
+    arguments:
+      - '@file_url_generator'
+
+  update_inline_media_references.batch_processor:
+    class: Drupal\update_inline_media_references\Service\MediaBatchProcessor
+    arguments:
+      - '@entity_type.manager'
+      - '@update_inline_media_references.fixer'
+      - '@logger.factory'

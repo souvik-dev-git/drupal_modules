@@ -1,0 +1,190 @@
+<?php
+
+use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\field\Entity\FieldConfig;
+
+/**
+ * Implements hook_install().
+ */
+function content_access_restriction_install() {
+  content_access_restriction_create_fields();
+}
+
+/**
+ * Create all required fields.
+ */
+function content_access_restriction_create_fields() {
+
+  $entity_type = 'node';
+
+  // Load all content types
+  $bundles = \Drupal::entityTypeManager()
+    ->getStorage('node_type')
+    ->loadMultiple();
+
+  /**
+   * -----------------------------
+   * FIELD 1: Restrict Roles
+   * -----------------------------
+   */
+  if (!FieldStorageConfig::loadByName($entity_type, 'field_restrict_roles')) {
+
+    FieldStorageConfig::create([
+      'field_name' => 'field_restrict_roles',
+      'entity_type' => $entity_type,
+      'type' => 'list_string',
+      'cardinality' => -1,
+      'settings' => [
+        'allowed_values' => [],
+      ],
+    ])->save();
+  }
+
+  foreach ($bundles as $bundle) {
+
+    if (!FieldConfig::loadByName($entity_type, $bundle->id(), 'field_restrict_roles')) {
+      FieldConfig::create([
+        'field_name' => 'field_restrict_roles',
+        'entity_type' => $entity_type,
+        'bundle' => $bundle->id(),
+        'label' => 'Restrict this page from',
+      ])->save();
+    }
+  }
+
+  /**
+   * -----------------------------
+   * FIELD 2: Restrict Users
+   * -----------------------------
+   */
+  if (!FieldStorageConfig::loadByName($entity_type, 'field_restrict_users')) {
+
+    FieldStorageConfig::create([
+      'field_name' => 'field_restrict_users',
+      'entity_type' => $entity_type,
+      'type' => 'entity_reference',
+      'cardinality' => -1,
+      'settings' => [
+        'target_type' => 'user',
+      ],
+    ])->save();
+  }
+
+  foreach ($bundles as $bundle) {
+
+    if (!FieldConfig::loadByName($entity_type, $bundle->id(), 'field_restrict_users')) {
+
+      FieldConfig::create([
+        'field_name' => 'field_restrict_users',
+        'entity_type' => $entity_type,
+        'bundle' => $bundle->id(),
+        'label' => 'Restrict this page from specific users',
+        'settings' => [
+          'handler' => 'default',
+          'handler_settings' => [],
+        ],
+      ])->save();
+    }
+  }
+
+  /**
+   * -----------------------------
+   * FIELD 3: Restrict Action (403 / 404)
+   * -----------------------------
+   */
+  if (!FieldStorageConfig::loadByName($entity_type, 'field_restrict_action')) {
+
+    FieldStorageConfig::create([
+      'field_name' => 'field_restrict_action',
+      'entity_type' => $entity_type,
+      'type' => 'list_string',
+      'cardinality' => 1,
+      'settings' => [
+        'allowed_values' => [
+          '403' => 'Access Denied (403)',
+          '404' => 'Page Not Found (404)',
+        ],
+      ],
+    ])->save();
+  }
+
+  foreach ($bundles as $bundle) {
+
+    if (!FieldConfig::loadByName($entity_type, $bundle->id(), 'field_restrict_action')) {
+      FieldConfig::create([
+        'field_name' => 'field_restrict_action',
+        'entity_type' => $entity_type,
+        'bundle' => $bundle->id(),
+        'label' => 'How do you want to restrict?',
+        'default_value' => [
+          ['value' => '403'],
+        ],
+      ])->save();
+    }
+  }
+
+  /**
+   * -----------------------------
+   * FIELD 4: Admin Bypass (Checkbox)
+   * -----------------------------
+   */
+  if (!FieldStorageConfig::loadByName($entity_type, 'field_restrict_bypass_admin')) {
+
+    FieldStorageConfig::create([
+      'field_name' => 'field_restrict_bypass_admin',
+      'entity_type' => $entity_type,
+      'type' => 'boolean',
+      'settings' => [
+        'on_label' => 'Yes',
+        'off_label' => 'No',
+      ],
+    ])->save();
+  }
+
+  foreach ($bundles as $bundle) {
+
+    if (!FieldConfig::loadByName($entity_type, $bundle->id(), 'field_restrict_bypass_admin')) {
+      FieldConfig::create([
+        'field_name' => 'field_restrict_bypass_admin',
+        'entity_type' => $entity_type,
+        'bundle' => $bundle->id(),
+        'label' => 'Bypass this access check for Administrator',
+      ])->save();
+    }
+  }
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function content_access_restriction_uninstall() {
+
+  $fields = [
+    'field_restrict_roles',
+    'field_restrict_users',
+    'field_restrict_action',
+    'field_restrict_bypass_admin',
+  ];
+
+  $entity_type = 'node';
+
+  foreach ($fields as $field_name) {
+
+    // Delete field instances
+    $field_configs = \Drupal::entityTypeManager()
+      ->getStorage('field_config')
+      ->loadByProperties([
+        'field_name' => $field_name,
+        'entity_type' => $entity_type,
+      ]);
+
+    foreach ($field_configs as $field_config) {
+      $field_config->delete();
+    }
+
+    // Delete field storage
+    if ($storage = FieldStorageConfig::loadByName($entity_type, $field_name)) {
+      $storage->delete();
+    }
+  }
+}

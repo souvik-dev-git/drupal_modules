@@ -1,0 +1,13 @@
+administer content access restriction:
+  title: 'Administer Content Access Restriction'
+  description: 'Access the Content Access Restriction administration page.'
+  restrict access: true
+
+administer content access restriction settings:
+  title: 'Administer Content Access Restriction settings'
+  description: 'Manage Content Access Restriction settings.'
+  restrict access: true
+
+view restricted content:
+  title: 'View Restricted Content'
+  description: 'View the Restricted Content report.'

@@ -1,0 +1,15 @@
+view website feedback list:
+  title: 'View Website Feedback list'
+  description: 'Access the Website Feedback administration listing.'
+
+view website feedback:
+  title: 'View Website Feedback'
+  description: 'View individual Website Feedback details.'
+
+delete website feedback:
+  title: 'Delete Website Feedback'
+  description: 'Delete Website Feedback submissions.'
+
+administer website feedback:
+  title: 'Administer Website Feedback'
+  description: 'Configure Website Feedback settings.'

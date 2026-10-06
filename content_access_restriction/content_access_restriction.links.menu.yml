@@ -1,0 +1,19 @@
+content_access_restriction.admin:
+  title: 'Content Access Restriction'
+  description: 'Manage content access restriction.'
+  route_name: content_access_restriction.admin
+  parent: system.admin_config_content
+  weight: 100
+  expanded: true
+
+content_access_restriction.settings:
+  title: 'Settings'
+  route_name: content_access_restriction.settings
+  parent: content_access_restriction.admin
+  weight: 0
+
+content_access_restriction.restricted_content:
+  title: 'Restricted Content'
+  route_name: content_access_restriction.restricted_content
+  parent: content_access_restriction.admin
+  weight: 10

@@ -1,0 +1,7 @@
+update_inline_media_references.form:
+  path: '/admin/config/media/update-media-references'
+  defaults:
+    _form: '\Drupal\update_inline_media_references\Form\MediaUrlFixForm'
+    _title: 'Update Media References'
+  requirements:
+    _permission: 'administer nodes'

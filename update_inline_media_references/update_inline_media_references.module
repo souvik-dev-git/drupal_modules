@@ -1,0 +1,126 @@
+<?php
+
+/**
+ * @file
+ * Update Inline Media References module.
+ */
+
+/**
+ * Implements hook_help().
+ */
+function update_inline_media_references_help(
+  $route_name,
+  $route_match
+) {
+
+  switch ($route_name) {
+
+    /**
+     * Full help page content.
+     */
+    case 'help.page.update_inline_media_references':
+
+      return '
+
+        <div class="update-inline-media-help">
+
+          <h2>Overview</h2>
+
+          <p>
+            The <strong>Update Inline Media References</strong> module
+            updates migrated inline media URLs inside formatted HTML
+            content fields.
+          </p>
+
+          <p>
+            The module scans selected content types and recursively
+            processes referenced entities such as paragraphs,
+            nested components, and other referenced content entities.
+          </p>
+
+          <hr>
+
+          <h2>Features</h2>
+
+          <ul>
+            <li>Batch processing support</li>
+            <li>Recursive entity reference processing</li>
+            <li>Supports paragraphs and nested entities</li>
+            <li>Dynamic media type detection</li>
+            <li>Automatically reads supported file extensions from media configuration</li>
+            <li>Supports image, document, audio, and video media types</li>
+            <li>Updates inline URLs inside formatted HTML fields</li>
+          </ul>
+
+          <hr>
+
+          <h2>Supported HTML Elements</h2>
+
+          <p>
+            The following HTML elements are scanned:
+          </p>
+
+          <ul>
+            <li><code>&lt;img src&gt;</code></li>
+            <li><code>&lt;a href&gt;</code></li>
+            <li><code>&lt;video src&gt;</code></li>
+            <li><code>&lt;source src&gt;</code></li>
+            <li><code>&lt;iframe src&gt;</code></li>
+          </ul>
+
+          <hr>
+
+          <h2>How It Works</h2>
+
+          <ol>
+            <li>Select one or more content types.</li>
+            <li>Select media types to process.</li>
+            <li>The module dynamically collects supported file extensions from media type configuration.</li>
+            <li>The module scans formatted HTML fields for inline media URLs.</li>
+            <li>Matching Drupal file entities are identified by filename.</li>
+            <li>URLs are rewritten using Drupal-generated file URLs.</li>
+          </ol>
+
+          <hr>
+
+          <h2>Supported Field Types</h2>
+
+          <ul>
+            <li>text</li>
+            <li>text_long</li>
+            <li>text_with_summary</li>
+            <li>string_long</li>
+          </ul>
+
+          <hr>
+
+          <h2>Recommended Usage</h2>
+
+          <ul>
+            <li>Run after content migrations</li>
+            <li>Run after media imports</li>
+            <li>Use on staging before production execution</li>
+            <li>Take a database backup before large updates</li>
+          </ul>
+
+          <hr>
+
+          <h2>Accessing the Tool</h2>
+
+          <p>
+            Navigate to:
+          </p>
+
+          <p>
+            <code>
+              Administration → Configuration → Media → Update Inline Media References
+            </code>
+          </p>
+
+        </div>
+
+      ';
+
+  }
+
+}
