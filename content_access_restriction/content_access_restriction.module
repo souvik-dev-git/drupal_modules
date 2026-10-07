@@ -37,6 +37,8 @@ function content_access_restriction_form_node_form_alter(array &$form, FormState
 
             $bypass_admin = (bool) ($node->get('field_restrict_bypass_admin')->value ?? 0);
 
+            $existing_usernames = $node->get('field_restrict_usernames')->value ?? '';
+
             $form['access_tabs'] = [
                 '#type' => 'vertical_tabs',
                 '#title' => t('Content Access Restriction'),
@@ -56,6 +58,20 @@ function content_access_restriction_form_node_form_alter(array &$form, FormState
                 '#title' => t('Restrict this page from'),
                 '#options' => $roles,
                 '#default_value' => $existing_roles,
+            ];
+
+            $form['restrict_settings']['field_restrict_usernames_custom'] = [
+                '#type' => 'textfield',
+                '#title' => t('Restrict from specific users'),
+                '#default_value' => $existing_usernames,
+                '#description' => t('Start typing a username or user ID to select a user. Multiple users can be added, separated by commas.'),
+                '#maxlength' => 2048,
+                '#autocomplete_route_name' => 'content_access_restriction.user_autocomplete',
+                '#attached' => [
+                    'library' => [
+                        'content_access_restriction/user_autocomplete',
+                    ],
+                ],
             ];
 
             $form['restrict_settings']['field_restrict_action_custom'] = [
@@ -80,6 +96,7 @@ function content_access_restriction_form_node_form_alter(array &$form, FormState
             $form['field_restrict_roles']['#access'] = FALSE;
             $form['field_restrict_action']['#access'] = FALSE;
             $form['field_restrict_bypass_admin']['#access'] = FALSE;
+            $form['field_restrict_usernames']['#access'] = FALSE;
 
             $form['#entity_builders']['content_access_restriction'] = 'content_access_restriction_entity_builder';
         }
@@ -108,6 +125,14 @@ function content_access_restriction_entity_builder($entity_type, NodeInterface $
     }
 
     $entity->set('field_restrict_roles', $role_values);
+
+    $usernames = array_filter(array_map(
+        'trim',
+        explode(',', (string) $form_state->getValue('field_restrict_usernames_custom'))
+    ));
+    $usernames = array_values(array_unique($usernames));
+
+    $entity->set('field_restrict_usernames', implode(', ', $usernames));
 
     $action = $form_state->getValue('field_restrict_action_custom');
 

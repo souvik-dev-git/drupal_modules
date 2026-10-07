@@ -3,6 +3,8 @@
 namespace Drupal\content_access_restriction\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Drupal\Core\Link;
 use Drupal\Core\Url;
 use Drupal\node\Entity\Node;
@@ -123,6 +125,63 @@ public function overview() {
 }
 
   /**
+   * Returns user suggestions for the specific-user restriction field.
+   *
+   * The search supports both username and numeric Drupal user ID.
+   *
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *   The current request.
+   *
+   * @return \Symfony\Component\HttpFoundation\JsonResponse
+   *   Autocomplete suggestions.
+   */
+  public function userAutocomplete(Request $request): JsonResponse {
+    $input = trim((string) $request->query->get('q', ''));
+
+    // When the field contains multiple comma-separated users, search only
+    // against the token currently being typed.
+    $tokens = preg_split('/\s*,\s*/', $input);
+    $search = trim((string) end($tokens));
+
+    if ($search === '') {
+      return new JsonResponse([]);
+    }
+
+    $user_storage = $this->entityTypeManagerService->getStorage('user');
+    $query = $user_storage->getQuery()
+      ->accessCheck(TRUE)
+      ->range(0, 10);
+
+    $or = $query->orConditionGroup()
+      ->condition('name', $search, 'CONTAINS');
+
+    if (ctype_digit($search)) {
+      $or->condition('uid', (int) $search);
+    }
+
+    $uids = $query
+      ->condition($or)
+      ->sort('name', 'ASC')
+      ->execute();
+
+    $users = $user_storage->loadMultiple($uids);
+    $suggestions = [];
+
+    foreach ($users as $user) {
+      if (!$user->access('view')) {
+        continue;
+      }
+
+      $suggestions[] = [
+        'value' => $user->getAccountName(),
+        'label' => $user->getAccountName() . ' (UID: ' . $user->id() . ')',
+      ];
+    }
+
+    return new JsonResponse($suggestions);
+  }
+
+  /**
    * Restricted content listing.
    */
   public function restrictedContent(): array {
@@ -132,6 +191,7 @@ public function overview() {
       $this->t('Title'),
       $this->t('Content Type'),
       $this->t('Restricted Roles'),
+      $this->t('Restricted Users'),
       $this->t('Restriction Type'),
       $this->t('Administrator Bypass'),
       $this->t('Updated'),
@@ -141,8 +201,14 @@ public function overview() {
     $node_storage = $this->entityTypeManagerService->getStorage('node');
 
     $query = $node_storage->getQuery()
-      ->accessCheck(FALSE)
+      ->accessCheck(FALSE);
+
+    $restriction_group = $query->orConditionGroup()
       ->exists('field_restrict_roles')
+      ->exists('field_restrict_usernames');
+
+    $query
+      ->condition($restriction_group)
       ->sort('changed', 'DESC')
       ->pager(25);
 
@@ -176,6 +242,12 @@ public function overview() {
         foreach ($node->get('field_restrict_roles') as $item) {
           $restricted_roles[] = $role_labels[$item->value] ?? $item->value;
         }
+
+        // Restricted users.
+        $restricted_usernames = array_filter(array_map(
+          'trim',
+          explode(',', (string) ($node->get('field_restrict_usernames')->value ?? ''))
+        ));
 
         $restriction_type = $node->get('field_restrict_action')->value === '404'
           ? $this->t('Page Not Found (404)')
@@ -216,6 +288,9 @@ public function overview() {
           $content_type,
           !empty($restricted_roles)
             ? implode(', ', $restricted_roles)
+            : $this->t('None'),
+          !empty($restricted_usernames)
+            ? implode(', ', $restricted_usernames)
             : $this->t('None'),
           $restriction_type,
           $admin_bypass,

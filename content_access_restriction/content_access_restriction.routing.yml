@@ -21,3 +21,11 @@ content_access_restriction.restricted_content:
     _title: 'Restricted Content'
   requirements:
     _permission: 'view restricted content'
+content_access_restriction.user_autocomplete:
+  path: '/admin/config/content/content-access-restriction/user-autocomplete'
+  defaults:
+    _controller: '\Drupal\content_access_restriction\Controller\ContentAccessRestrictionController::userAutocomplete'
+  requirements:
+    _permission: 'access user profiles'
+  options:
+    no_cache: true

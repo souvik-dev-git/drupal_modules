@@ -83,6 +83,32 @@ function content_access_restriction_create_fields() {
     }
   }
 
+
+  /**
+   * -----------------------------
+   * FIELD 4: Restrict Usernames
+   * -----------------------------
+   */
+  if (!FieldStorageConfig::loadByName($entity_type, 'field_restrict_usernames')) {
+    FieldStorageConfig::create([
+      'field_name' => 'field_restrict_usernames',
+      'entity_type' => $entity_type,
+      'type' => 'string_long',
+      'cardinality' => 1,
+    ])->save();
+  }
+
+  foreach ($bundles as $bundle) {
+    if (!FieldConfig::loadByName($entity_type, $bundle->id(), 'field_restrict_usernames')) {
+      FieldConfig::create([
+        'field_name' => 'field_restrict_usernames',
+        'entity_type' => $entity_type,
+        'bundle' => $bundle->id(),
+        'label' => 'Restrict from specific users',
+      ])->save();
+    }
+  }
+
   /**
    * -----------------------------
    * FIELD 3: Admin Bypass (Checkbox)
@@ -113,6 +139,37 @@ function content_access_restriction_create_fields() {
 }
 
 /**
+ * Add the specific-user restriction field to existing installations.
+ */
+function content_access_restriction_update_10001() {
+  $entity_type = 'node';
+
+  if (!FieldStorageConfig::loadByName($entity_type, 'field_restrict_usernames')) {
+    FieldStorageConfig::create([
+      'field_name' => 'field_restrict_usernames',
+      'entity_type' => $entity_type,
+      'type' => 'string_long',
+      'cardinality' => 1,
+    ])->save();
+  }
+
+  $bundles = \Drupal::entityTypeManager()
+    ->getStorage('node_type')
+    ->loadMultiple();
+
+  foreach ($bundles as $bundle) {
+    if (!FieldConfig::loadByName($entity_type, $bundle->id(), 'field_restrict_usernames')) {
+      FieldConfig::create([
+        'field_name' => 'field_restrict_usernames',
+        'entity_type' => $entity_type,
+        'bundle' => $bundle->id(),
+        'label' => 'Restrict from specific users',
+      ])->save();
+    }
+  }
+}
+
+/**
  * Implements hook_uninstall().
  */
 function content_access_restriction_uninstall() {
@@ -120,6 +177,7 @@ function content_access_restriction_uninstall() {
     'field_restrict_roles',
     'field_restrict_action',
     'field_restrict_bypass_admin',
+    'field_restrict_usernames',
   ];
 
   $entity_type = 'node';
