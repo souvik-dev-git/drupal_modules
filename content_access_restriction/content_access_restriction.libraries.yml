@@ -1,0 +1,9 @@
+user_autocomplete:
+  version: 1.x
+  js:
+    js/content-access-user-autocomplete.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
+    - core/jquery
+    - core/drupal.autocomplete
